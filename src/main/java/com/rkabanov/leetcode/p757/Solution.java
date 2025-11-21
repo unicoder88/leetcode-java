@@ -9,20 +9,14 @@ public class Solution {
         Arrays.sort(intervals, Comparator.comparingInt(i -> i[0]));
         System.out.println("Sorted " + Arrays.deepToString(intervals));
 
-        // overlap all intervals and count each number frequency
-        HashMap<Integer, Integer> histogram = new HashMap<>();
-        for (int[] interval : intervals) {
-            for (int num = interval[0]; num <= interval[1]; num++) {
-                histogram.merge(num, 1, Integer::sum);
-            }
-        }
-        System.out.println("Histogram: " + histogram.toString());
-
         HashSet<Integer> resultNumbers = new HashSet<>();
         int minResultLength = 0;
 
+        ArrayList<int[]> intervalList = new ArrayList<>(List.of(intervals));
+
         // for each interval, pick 2 most frequent numbers
-        for (int[] interval : intervals) {
+        for (int currentIntervalNum = 0; currentIntervalNum < intervalList.size(); currentIntervalNum++) {
+            int[] interval = intervalList.get(currentIntervalNum);
             System.out.println("[" + interval[0] + ", " + interval[1] + "]");
 
             int intervalNumbersRemainingToPick = 2;
@@ -35,8 +29,12 @@ public class Solution {
             intervalNumbersRemainingToPick -= reuseNumbers.size();
 
             if (intervalNumbersRemainingToPick > 0) {
-                // find remaining numbers from the best intersection, excluding already used
-                ArrayList<Integer> bestNumbers = twoMostFrequentNumbers(interval, histogram, resultNumbers);
+                // find remaining numbers from the best intersection OF REMAINING INTERVALS ONLY, excluding already used
+                ArrayList<Integer> bestNumbers = twoMostFrequentNumbers(
+                        interval,
+                        intervalList.subList(currentIntervalNum, intervalList.size()),
+                        resultNumbers
+                );
                 System.out.println("  Best numbers: " + bestNumbers.toString());
 
                 // pick remaining numbers from best if available
@@ -70,13 +68,28 @@ public class Solution {
         return result;
     }
 
-    ArrayList<Integer> twoMostFrequentNumbers(int[] interval, Map<Integer, Integer> histogram, Set<Integer> resultNumbers) {
+    HashMap<Integer, Integer> calculateHistogram(List<int[]> intervals) {
+        // overlap all intervals and count each number frequency
+        HashMap<Integer, Integer> result = new HashMap<>();
+        for (int[] interval : intervals) {
+            for (int num = interval[0]; num <= interval[1]; num++) {
+                result.merge(num, 1, Integer::sum);
+            }
+        }
+
+        return result;
+    }
+
+    ArrayList<Integer> twoMostFrequentNumbers(int[] interval, List<int[]> intervals, Set<Integer> resultNumbers) {
         // best numbers: "1" with score 2, "2" with score 3
         int from = interval[0];
         int to = interval[1];
 
         int best = -1;
         int secondBest = -1;
+
+        Map<Integer, Integer> histogram = calculateHistogram(intervals);
+        System.out.println("  Histogram: " + histogram);
 
         // go over rest of numbers, update best and second best if met
         for (int num = from; num <= to; num++) {
