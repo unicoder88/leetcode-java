@@ -39,4 +39,17 @@ public class SolutionTest {
         });
         assertEquals(5, result);
     }
+
+    @Test
+    public void testCase54() {
+        var solution = new Solution();
+        int result = solution.intersectionSizeTwo(new int[][]{
+                {6, 21},
+                {1, 15},
+                {15, 20},
+                {10, 21},
+                {0, 7},
+        });
+        assertEquals(4, result);
+    }
 }
