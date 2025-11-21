@@ -5,8 +5,8 @@ import java.util.*;
 public class Solution {
     public int intersectionSizeTwo(int[][] intervals) {
         // 3000 intervals
-        // sort by interval start for easy navigation
-        Arrays.sort(intervals, Comparator.comparingInt(i -> i[0]));
+        // shortest intervals first
+        Arrays.sort(intervals, Comparator.comparingInt(interval -> interval[1] - interval[0]));
         System.out.println("Sorted " + Arrays.deepToString(intervals));
 
         HashSet<Integer> resultNumbers = new HashSet<>();
