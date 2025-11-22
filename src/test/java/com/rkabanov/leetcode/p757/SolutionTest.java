@@ -70,4 +70,17 @@ public class SolutionTest {
         });
         assertEquals(4, result);
     }
+
+    @Test
+    public void testSolution6() {
+        var solution = new Solution();
+        int result = solution.intersectionSizeTwo(new int[][]{
+                {2, 15},
+                {9, 17},
+                {0, 6},
+                {17, 25},
+                {0, 25},
+        });
+        assertEquals(5, result);
+    }
 }

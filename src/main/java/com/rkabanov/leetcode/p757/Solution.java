@@ -1,6 +1,7 @@
 package com.rkabanov.leetcode.p757;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Solution {
     public int intersectionSizeTwo(int[][] intervals) {
@@ -12,11 +13,11 @@ public class Solution {
         HashSet<Integer> resultNumbers = new HashSet<>();
         int minResultLength = 0;
 
-        ArrayList<int[]> intervalList = new ArrayList<>(List.of(intervals));
+        List<int[]> intervalList = new ArrayList<>(List.of(intervals));
 
         // for each interval, pick 2 most frequent numbers
-        for (int currentIntervalNum = 0; currentIntervalNum < intervalList.size(); currentIntervalNum++) {
-            int[] interval = intervalList.get(currentIntervalNum);
+        while (!intervalList.isEmpty()) {
+            int[] interval = intervalList.get(0);
             System.out.println("[" + interval[0] + ", " + interval[1] + "]");
 
             int intervalNumbersRemainingToPick = 2;
@@ -30,11 +31,7 @@ public class Solution {
 
             if (intervalNumbersRemainingToPick > 0) {
                 // find remaining numbers from the best intersection OF REMAINING INTERVALS ONLY, excluding already used
-                ArrayList<Integer> bestNumbers = twoMostFrequentNumbers(
-                        interval,
-                        intervalList.subList(currentIntervalNum, intervalList.size()),
-                        resultNumbers
-                );
+                ArrayList<Integer> bestNumbers = twoMostFrequentNumbers(interval, intervalList, resultNumbers);
                 System.out.println("  Best numbers: " + bestNumbers.toString());
 
                 // pick remaining numbers from best if available
@@ -46,12 +43,44 @@ public class Solution {
                 }
             }
 
-
+            // remove current interval - processed
+            intervalList.remove(0);
+            // remove possible intervals that now contain 2 numbers from result numbers
+            intervalList = remainingIntervals(intervalList, resultNumbers);
+            System.out.println("Remaining " + Arrays.deepToString(intervals));
         }
 
         System.out.println("Result set: " + resultNumbers);
 
         return minResultLength;
+    }
+
+    List<int[]> remainingIntervals(List<int[]> intervals, Set<Integer> resultNumbers) {
+        if (resultNumbers.size() < 2) {
+            // interval can be removed after at least 2 numbers picked
+            return intervals;
+        }
+
+        return intervals.stream()
+                .filter(interval -> {
+                    int from = interval[0];
+                    int to = interval[1];
+
+                    int matches = 0;
+                    for (int num : resultNumbers) {
+                        if (num >= from && num <= to) {
+                            matches++;
+                            if (matches >= 2) {
+                                // remove this interval
+                                System.out.println("  Removing interval [" + from + ", " + to + "]");
+                                return false;
+                            }
+                        }
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     List<Integer> reuseTwoNumbers(int[] interval, Set<Integer> resultNumbers) {
