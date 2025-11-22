@@ -25,29 +25,25 @@ public class Solution {
             // try to reuse from result numbers
             List<Integer> reuseNumbers = reuseTwoNumbers(interval, resultNumbers);
             System.out.println("  Reuse: " + reuseNumbers.toString());
-            resultNumbers.addAll(reuseNumbers);
 
             intervalNumbersRemainingToPick -= reuseNumbers.size();
 
-            if (intervalNumbersRemainingToPick > 0) {
-                // find remaining numbers from the best intersection OF REMAINING INTERVALS ONLY, excluding already used
-                ArrayList<Integer> bestNumbers = twoMostFrequentNumbers(interval, intervalList, resultNumbers);
-                System.out.println("  Best numbers: " + bestNumbers.toString());
+            // find remaining numbers from the best intersection OF REMAINING INTERVALS ONLY, excluding already used
+            while (intervalNumbersRemainingToPick > 0) {
+                int bestNumber = mostFrequentNumber(interval, intervalList, resultNumbers);
+                System.out.println("  Next best: " + bestNumber);
+                resultNumbers.add(bestNumber);
+                intervalNumbersRemainingToPick--;
+                minResultLength++;
 
-                // pick remaining numbers from best if available
-                while (intervalNumbersRemainingToPick > 0 && !bestNumbers.isEmpty()) {
-                    System.out.println("  Adding " + bestNumbers.get(0));
-                    resultNumbers.add(bestNumbers.remove(0));
-                    intervalNumbersRemainingToPick--;
-                    minResultLength++;
-                }
+                // remove possible intervals that now contain new numbers from result numbers
+                intervalList = remainingIntervals(intervalList, resultNumbers);
+                System.out.println("Remaining " + Arrays.deepToString(intervals));
             }
 
-            // remove current interval - processed
-            intervalList.remove(0);
-            // remove possible intervals that now contain 2 numbers from result numbers
-            intervalList = remainingIntervals(intervalList, resultNumbers);
-            System.out.println("Remaining " + Arrays.deepToString(intervals));
+            // safeguard
+            intervalList.remove(interval);
+//            intervalList.remove(0);
         }
 
         System.out.println("Result set: " + resultNumbers);
@@ -97,27 +93,29 @@ public class Solution {
         return result;
     }
 
-    HashMap<Integer, Integer> calculateHistogram(List<int[]> intervals) {
+    HashMap<Integer, Integer> calculateHistogram(int[] currentInterval, List<int[]> intervals) {
         // overlap all intervals and count each number frequency
         HashMap<Integer, Integer> result = new HashMap<>();
-        for (int[] interval : intervals) {
-            for (int num = interval[0]; num <= interval[1]; num++) {
-                result.merge(num, 1, Integer::sum);
+
+        for (int num = currentInterval[0]; num <= currentInterval[1]; num++) {
+            for (int[] interval : intervals) {
+                if (num >= interval[0] && num <= interval[1]) {
+                    result.merge(num, 1, Integer::sum);
+                }
             }
         }
 
         return result;
     }
 
-    ArrayList<Integer> twoMostFrequentNumbers(int[] interval, List<int[]> intervals, Set<Integer> resultNumbers) {
+    int mostFrequentNumber(int[] interval, List<int[]> intervals, Set<Integer> resultNumbers) {
         // best numbers: "1" with score 2, "2" with score 3
         int from = interval[0];
         int to = interval[1];
 
         int best = -1;
-        int secondBest = -1;
 
-        Map<Integer, Integer> histogram = calculateHistogram(intervals);
+        Map<Integer, Integer> histogram = calculateHistogram(interval, intervals);
         System.out.println("  Histogram: " + histogram);
 
         // go over rest of numbers, update best and second best if met
@@ -126,41 +124,17 @@ public class Solution {
                 continue;
             }
 
-            int score = histogram.get(num);
-
-            // take in first 2 numbers in correct order
+            // take in first number
             if (best == -1) {
                 best = num;
                 continue;
             }
 
-            if (secondBest == -1) {
-                if (score > histogram.get(best)) {
-                    // new number is new best
-                    secondBest = best;
-                    best = num;
-                } else {
-                    // new number is second best
-                    secondBest = num;
-                }
-                continue;
-            }
-
-            if (score > histogram.get(best)) {
-                secondBest = best;
+            if ((int) histogram.get(num) > histogram.get(best)) {
                 best = num;
-            } else if (score > histogram.get(secondBest)) {
-                secondBest = num;
             }
         }
 
-        ArrayList<Integer> result = new ArrayList<>();
-        if (best != -1) {
-            result.add(best);
-        }
-        if (secondBest != -1) {
-            result.add(secondBest);
-        }
-        return result;
+        return best;
     }
 }
