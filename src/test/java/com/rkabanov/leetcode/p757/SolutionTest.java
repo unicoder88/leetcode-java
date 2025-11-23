@@ -116,4 +116,37 @@ public class SolutionTest {
         });
         assertEquals(8, result);
     }
+
+    @Test
+    public void testSolution8() {
+        var solution = new Solution();
+        int result = solution.intersectionSizeTwo(new int[][]{
+                {12, 21},
+                {11, 15},
+                {5, 9},
+                {6, 21},
+                {12, 23},
+                {1, 12},
+                {4, 10},
+                {16, 23},
+                {5, 13},
+                {13, 23},
+                {20, 22},
+                {7, 14},
+                {2, 18},
+                {18, 25},
+                {4, 25},
+                {22, 25},
+                {3, 7},
+                {2, 23},
+                {6, 15},
+                {11, 17},
+                {14, 24},
+                {12, 15},
+                {14, 20},
+                {1, 3},
+                {5, 11},
+        });
+        assertEquals(9, result);
+    }
 }
